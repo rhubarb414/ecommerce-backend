@@ -36,10 +36,10 @@ router.get("/:id", async (req, res) => {
 router.post("/", (req, res) => {
   /* req.body should look like this...
     {
-      product_name: "Basketball",
-      price: 200.00,
-      stock: 3,
-      tagIds: [1, 2, 3, 4]
+      "product_name": "Basketball",
+      "price": 200.00,
+      "stock": 3,
+      "tagIds": [1, 2, 3, 4]
     }
   */
   Product.create(req.body)
@@ -64,8 +64,11 @@ router.post("/", (req, res) => {
     });
 });
 
-// Update product
+// Update product tags to array given in req.body
 router.put("/:id", (req, res) => {
+  //req.body looks like:
+  // { "tagIds": [3,4,5] }
+
   // update product data
   Product.update(req.body, {
     where: {
@@ -107,6 +110,23 @@ router.put("/:id", (req, res) => {
 });
 
 // Delete one product by its `id` value
-router.delete("/:id", (req, res) => {});
+router.delete("/:id", async (req, res) => {
+  try {
+    const deletedProduct = await Product.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    if (!deletedProduct) {
+      res.status(404).json({ message: "Product ID not found." });
+      return;
+    }
+    res.status(200).json(deletedProduct);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+});
 
 module.exports = router;
